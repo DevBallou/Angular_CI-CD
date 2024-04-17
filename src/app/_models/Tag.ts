@@ -1,13 +1,13 @@
 export class Tag {
   static readonly ANGULAR = new Tag('Angular', 'red');
-  static readonly TYPESCRIPT = new Tag('TypeScript', 'darkred');
-  static readonly PYTHON = new Tag('Python', 'pink');
-  static readonly CSHARP = new Tag('C#', 'green');
-  static readonly JAVA = new Tag('Java', 'orange');
-  static readonly NODEJS = new Tag('Node.JS', 'brown');
-  static readonly ASPNET = new Tag('ASP.NET', 'purple');
-  static readonly JAVASCRIPT = new Tag('JavaScript', 'orange');
   static readonly REACT = new Tag('React', 'blue');
+  static readonly VUE = new Tag('VUE', 'pink');
+  static readonly JAVASCRIPT = new Tag('JavaScript', 'orange');
+  static readonly TYPESCRIPT = new Tag('TypeScript', 'darkred');
+  static readonly LARAVEL = new Tag('Laravel', 'green');
+  static readonly LIVEWIRE = new Tag('Livewire', 'orange');
+  static readonly FILAMENT = new Tag('Filament', 'brown');
+  static readonly ASPNET = new Tag('ASP.NET', 'purple');
 
   private constructor(private readonly key: string, public readonly color: string) {
 

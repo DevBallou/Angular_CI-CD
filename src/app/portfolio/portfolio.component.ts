@@ -22,12 +22,12 @@ export class PortfolioComponent implements OnInit {
   // Languages
   typescript = false;
   javascript = false;
-  python = false;
-  csharp = false;
-  java = false;
+  vue = false;
+  laravel = false;
+  livewire = false;
   // Frameworks
   angular = false;
-  nodejs = false;
+  filament = false;
   aspnet = false;
   react = false;
 
@@ -44,35 +44,35 @@ export class PortfolioComponent implements OnInit {
   Filter() {
     let filterTags: Tag[] = [];
 
-    if(this.typescript) {
+    if (this.typescript) {
       filterTags.push(Tag.TYPESCRIPT);
     }
-    if(this.angular) {
+    if (this.angular) {
       filterTags.push(Tag.ANGULAR);
     }
-    if(this.python) {
-      filterTags.push(Tag.PYTHON);
+    if (this.vue) {
+      filterTags.push(Tag.VUE);
     }
-    if(this.csharp) {
-      filterTags.push(Tag.CSHARP);
+    if (this.livewire) {
+      filterTags.push(Tag.LIVEWIRE);
     }
-    if(this.java) {
-      filterTags.push(Tag.JAVA);
+    if (this.filament) {
+      filterTags.push(Tag.FILAMENT);
     }
-    if(this.nodejs) {
-      filterTags.push(Tag.NODEJS);
+    if (this.laravel) {
+      filterTags.push(Tag.LARAVEL);
     }
-    if(this.aspnet) {
+    if (this.aspnet) {
       filterTags.push(Tag.ASPNET);
     }
-    if(this.javascript) {
+    if (this.javascript) {
       filterTags.push(Tag.JAVASCRIPT);
     }
-    if(this.react) {
+    if (this.react) {
       filterTags.push(Tag.REACT);
     }
 
-    if (this.python || this.csharp || this.java || this.angular || this.typescript || this.nodejs || this.aspnet || this.javascript || this.react) {
+    if (this.vue || this.laravel || this.livewire || this.angular || this.typescript || this.filament || this.aspnet || this.javascript || this.react) {
       this.filtering = true;
     }
 
@@ -80,12 +80,12 @@ export class PortfolioComponent implements OnInit {
   }
 
   ResetFilters() {
-    this.python = false;
-    this.csharp = false;
-    this.java = false;
+    this.vue = false;
+    this.laravel = false;
+    this.livewire = false;
     this.angular = false;
     this.typescript = false;
-    this.nodejs = false;
+    this.filament = false;
     this.aspnet = false;
     this.react = false;
     this.filtering = false;
