@@ -1,4 +1,6 @@
 .card {
-  background-color: rgb(134, 32, 134);
+  background-image: url(../../assets/cover3.jpg);
+  background-position: bottom;
+  background-size: cover;
   color: white;
 }
