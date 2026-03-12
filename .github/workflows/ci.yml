@@ -1,0 +1,146 @@
+name: Angular CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: npm install
+      - name: adding environment variables
+        run: |
+          echo "export const environment = {
+            production: true,
+            supabaseUrl: '${{ vars.VITE_SUPABASE_URL
+          }}',
+            supabaseAnonKey: '${{ vars.VITE_SUPABASE_ANON_KEY }}'
+          };" > src/environments/environment.prod.ts
+
+      # - name: Run lint
+      #   run: npm run lint
+      - name: Skip lint (not configured)
+        run: echo "Lint not configured for this project"
+
+      - name: Run unit tests
+        run: npx ng test demo --watch=false --browsers=ChromeHeadless
+
+      # - name: Build Angular app
+      #   run: npm run build
+      - name: Build Angular
+        run: npm run build -- --base-href="/${{ github.event.repository.name }}/" --configuration production
+      - name: Debug dist folder
+        run: ls -la dist
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/demo/browser
+      - name: Create tag
+        if: github.ref == 'refs/heads/main'
+        run: |
+          git tag v$(date +'%Y%m%d%H%M%S')
+          git push origin --tags
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+      - name: Wait before health check
+        run: sleep 20
+
+      - name: Health check
+        id: health
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" ${{ steps.deployment.outputs.page_url }})
+          echo "HTTP STATUS: $STATUS"
+          if [ "$STATUS" != "200" ]; then
+            echo "Health check failed"
+            exit 1
+          fi
+
+  rollback:
+    needs: deploy
+    runs-on: ubuntu-latest
+    if: failure()
+
+    steps:
+      - name: Check if stable tag exists
+        id: check_stable
+        run: |
+          if git ls-remote --tags origin stable | grep stable; then
+            echo "stable_exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "stable_exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Stop if no stable version
+        if: steps.check_stable.outputs.stable_exists == 'false'
+        run: |
+          echo "No stable version found. Cannot rollback."
+          exit 0
+
+      - name: Checkout stable version
+        if: steps.check_stable.outputs.stable_exists == 'true'
+        uses: actions/checkout@v3
+        with:
+          ref: stable
+
+      - name: Setup Node.js
+        if: steps.check_stable.outputs.stable_exists == 'true'
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        if: steps.check_stable.outputs.stable_exists == 'true'
+        run: npm install
+        
+      - name: adding environment variables
+        if: steps.check_stable.outputs.stable_exists == 'true'
+        run: |
+          mkdir -p src/environments
+          cat <<EOF > src/environments/environment.prod.ts
+          export const environment = {
+            production: true,
+            supabaseUrl: "${{ vars.VITE_SUPABASE_URL }}",
+            supabaseAnonKey: "${{ vars.VITE_SUPABASE_ANON_KEY }}"
+          };
+          EOF
+
+      - name: Rebuild stable version
+        if: steps.check_stable.outputs.stable_exists == 'true'
+        run: npm run build -- --base-href="/${{ github.event.repository.name }}/" --configuration production
+
+      - name: Upload rollback artifact
+        if: steps.check_stable.outputs.stable_exists == 'true'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/demo/browser
+
+      - name: Redeploy stable version
+        if: steps.check_stable.outputs.stable_exists == 'true'
+        uses: actions/deploy-pages@v4
